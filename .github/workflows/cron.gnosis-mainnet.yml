@@ -42,8 +42,19 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Check required secrets
+        id: checkSecrets
+        run: |
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ]; then
+            echo "Required secrets (GNOSIS_MAINNET_JSON_RPC_URL, CUSTOM_RELAYER_PRIVATE_KEY) are not set. Skipping bot run."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.checkSecrets.outputs.skip == 'false'
         run: |
           npm install
           npx tsx index.ts
