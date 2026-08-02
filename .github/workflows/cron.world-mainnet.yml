@@ -68,7 +68,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.runBot.outputs.exitcode == 1
+        if: failure() && steps.runBot.conclusion == 'failure'
         uses: actions/github-script@v5
         continue-on-error: true
         with:
@@ -76,5 +76,5 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "$date"__"$time": Exit Code 1`
+              title: `Liquidator bot failed for run at "${process.env.date}"__"${process.env.time}": Exit Code 1`
             })
