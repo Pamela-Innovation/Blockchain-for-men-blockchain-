@@ -36,11 +36,11 @@ jobs:
 
       - name: Store current date
         id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
       
       - name: Store current time
         id: time
-        run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
+        run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_OUTPUT"
 
       - name: Check required secrets
         id: checkSecrets
@@ -60,6 +60,7 @@ jobs:
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.checkSecrets.outputs.skip == 'false'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -76,5 +77,5 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "${process.env.date}"__"${process.env.time}": Exit Code 1`
+              title: `Liquidator bot failed for run at "${{ steps.date.outputs.date }}"__"${{ steps.time.outputs.time }}": Exit Code 1`
             })
