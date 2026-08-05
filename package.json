@@ -26,5 +26,8 @@
         "tsx": "^4.7.2",
         "typescript": "^5.4.2",
         "yn": "^5.0.0"
+    },
+    "dependencies": {
+        "@covalenthq/client-sdk": "^3.0.6"
     }
 }
