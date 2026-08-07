@@ -42,6 +42,10 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Store retention history cutoff
+        id: historyDate
+        run: echo "history_cutoff=$(date -u -d '14 months ago' +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
       - name: Validate required secrets
         id: validateSecrets
         run: |
@@ -59,6 +63,7 @@ jobs:
               echo "Skipped liquidator bot run on chain ${CHAIN_ID}."
               echo "Date: ${date}"
               echo "Time: ${time}"
+              echo "Retention history cutoff (1y2m ago): ${history_cutoff}"
               echo "Missing required environment variables: $missing_vars_joined"
             } > missing-secrets.txt
           else
@@ -78,6 +83,7 @@ jobs:
         with:
           name: scroll-liquidator-missing-secrets-${{ env.date }}-${{ env.time }}
           path: missing-secrets.txt
+          retention-days: 90
 
       - name: Push changes (if required)
         if: always()
