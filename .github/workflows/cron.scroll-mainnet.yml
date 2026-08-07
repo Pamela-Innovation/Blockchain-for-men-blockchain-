@@ -42,11 +42,48 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Store retention history cutoff
+        id: historyDate
+        run: echo "history_cutoff=$(date -u -d '14 months ago' +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
+      - name: Validate required secrets
+        id: validateSecrets
+        run: |
+          missing_vars=()
+          [ -z "${JSON_RPC_URL}" ] && missing_vars+=("JSON_RPC_URL")
+          [ -z "${CUSTOM_RELAYER_PRIVATE_KEY}" ] && missing_vars+=("CUSTOM_RELAYER_PRIVATE_KEY")
+          [ -z "${CONTRACT_JSON_URL}" ] && missing_vars+=("CONTRACT_JSON_URL")
+
+          if [ ${#missing_vars[@]} -gt 0 ]; then
+            echo "has_required_secrets=false" >> "$GITHUB_OUTPUT"
+            missing_vars_joined="${missing_vars[*]}"
+            echo "missing_vars=$missing_vars_joined" >> "$GITHUB_OUTPUT"
+            echo "::warning::Skipping liquidator run; missing required environment variables: $missing_vars_joined"
+            {
+              echo "Skipped liquidator bot run on chain ${CHAIN_ID}."
+              echo "Date: ${date}"
+              echo "Time: ${time}"
+              echo "Retention history cutoff (1y2m ago): ${history_cutoff}"
+              echo "Missing required environment variables: $missing_vars_joined"
+            } > missing-secrets.txt
+          else
+            echo "has_required_secrets=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.validateSecrets.outputs.has_required_secrets == 'true'
         run: |
           npm install
           npx tsx index.ts
+
+      - name: Upload missing-secrets artifact
+        if: steps.validateSecrets.outputs.has_required_secrets != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scroll-liquidator-missing-secrets-${{ env.date }}-${{ env.time }}
+          path: missing-secrets.txt
+          retention-days: 90
 
       - name: Push changes (if required)
         if: always()
