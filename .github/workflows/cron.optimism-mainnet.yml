@@ -43,6 +43,7 @@ jobs:
 
       - name: Run bot
         id: runBot
+        continue-on-error: true
         run: |
           npm install
           npx tsx index.ts
