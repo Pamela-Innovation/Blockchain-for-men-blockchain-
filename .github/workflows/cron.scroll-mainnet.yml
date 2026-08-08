@@ -1,7 +1,6 @@
 name: CronJob - Liquidator Bot - Scroll
 on:
-  schedule:
-    - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+  workflow_dispatch: # Run manually only
 env:
   CHAIN_ID: 534352
   MIN_PROFIT_THRESHOLD_USD: 0.5
@@ -41,8 +40,20 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+
+      - name: Check required secrets
+        id: checkSecrets
+        run: |
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ]; then
+            echo "Required secrets (JSON_RPC_URL, CUSTOM_RELAYER_PRIVATE_KEY) are not configured. Skipping bot run."
+            echo "secrets_configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.checkSecrets.outputs.secrets_configured == 'true'
         run: |
           npm install
           npx tsx index.ts
