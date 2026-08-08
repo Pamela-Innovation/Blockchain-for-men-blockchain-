@@ -44,9 +44,9 @@ jobs:
       - name: Check required secrets
         id: checkSecrets
         run: |
-          if [ -z "${{ secrets.WORLD_MAINNET_JSON_RPC_URL }}" ] || [ -z "${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}" ]; then
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ]; then
             echo "required_secrets_set=false" >> "$GITHUB_OUTPUT"
-            echo "WARNING: Required secrets (WORLD_MAINNET_JSON_RPC_URL and/or CUSTOM_RELAYER_PRIVATE_KEY) are not set. Skipping bot run."
+            echo "WARNING: Required environment variables (JSON_RPC_URL and/or CUSTOM_RELAYER_PRIVATE_KEY) are not set. Skipping bot run."
           else
             echo "required_secrets_set=true" >> "$GITHUB_OUTPUT"
           fi
