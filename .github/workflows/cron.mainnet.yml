@@ -41,8 +41,19 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Check required secrets
+        id: checkSecrets
+        run: |
+          if [ -z "${{ secrets.ETHEREUM_MAINNET_JSON_RPC_URL }}" ] || [ -z "${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}" ]; then
+            echo "required_secrets_set=false" >> "$GITHUB_OUTPUT"
+            echo "WARNING: Required secrets (ETHEREUM_MAINNET_JSON_RPC_URL and/or CUSTOM_RELAYER_PRIVATE_KEY) are not set. Skipping bot run."
+          else
+            echo "required_secrets_set=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.checkSecrets.outputs.required_secrets_set == 'true'
         run: |
           npm install
           npx tsx index.ts
