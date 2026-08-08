@@ -42,13 +42,25 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Check required environment variables
+        id: requiredEnv
+        run: |
+          if [ -n "$JSON_RPC_URL" ] && [ -n "$CUSTOM_RELAYER_PRIVATE_KEY" ] && [ -n "$CONTRACT_JSON_URL" ]; then
+            echo "run_bot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_bot=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping bot run because required environment variables are not configured."
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.requiredEnv.outputs.run_bot == 'true'
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.requiredEnv.outputs.run_bot == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
