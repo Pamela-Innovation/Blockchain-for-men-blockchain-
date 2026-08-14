@@ -60,7 +60,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.runBot.outcome == 'failure'
+        if: always() && steps.runBot.outcome == 'failure'
         uses: actions/github-script@v7
         continue-on-error: true
         with:
