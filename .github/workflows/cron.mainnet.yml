@@ -13,7 +13,9 @@ env:
   ENV_TOKEN_ALLOW_LIST: ''
   DRY_RUN: 'true'
   NODE_OPTIONS: "--max_old_space_size=32768"
-permissions: write-all
+permissions:
+  contents: write
+  issues: write
 jobs:
   runCLI:
     name: Liquidator Bot
@@ -50,7 +52,7 @@ jobs:
           npx tsx index.ts
 
       - name: Push changes (if required)
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}

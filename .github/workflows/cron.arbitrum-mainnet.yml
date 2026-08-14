@@ -13,7 +13,9 @@ env:
   ENV_TOKEN_ALLOW_LIST: '0x8653084e01bd8c9e24b9a8feb2036251ee0c16a9,0x0000206329b97DB379d5E1Bf586BbDB969C63274'
   DRY_RUN: 'true'
   NODE_OPTIONS: "--max_old_space_size=32768"
-permissions: write-all
+permissions:
+  contents: write
+  issues: write
 jobs:
   runCLI:
     name: Liquidator Bot
@@ -50,7 +52,7 @@ jobs:
           npx tsx index.ts
 
       - name: Push changes (if required)
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
@@ -58,13 +60,13 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.runBot.outputs.exitcode == 1
-        uses: actions/github-script@v5
+        if: steps.runBot.outcome == 'failure'
+        uses: actions/github-script@v7
         continue-on-error: true
         with:
           script: |
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "$date"__"$time": Exit Code 1`
+              title: `Liquidator bot failed for run at "${process.env.date}__${process.env.time}": Exit Code 1`
             })
