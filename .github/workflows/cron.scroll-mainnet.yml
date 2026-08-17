@@ -41,13 +41,19 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Skip bot when required secrets are missing
+        if: env.JSON_RPC_URL == '' || env.CUSTOM_RELAYER_PRIVATE_KEY == ''
+        run: echo "Skipping liquidator run because required secrets are not configured."
+
       - name: Run bot
         id: runBot
+        if: env.JSON_RPC_URL != '' && env.CUSTOM_RELAYER_PRIVATE_KEY != ''
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: env.JSON_RPC_URL != '' && env.CUSTOM_RELAYER_PRIVATE_KEY != ''
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
