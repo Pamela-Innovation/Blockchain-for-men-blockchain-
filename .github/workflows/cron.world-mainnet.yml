@@ -72,5 +72,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: `Liquidator bot failed for run at "${process.env.date}__${process.env.time}": Exit Code 1`,
-              body: 'openAI Grok@bot'
+              body: '@some-bot[bot]'
             })
