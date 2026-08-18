@@ -2,7 +2,23 @@
 
 ### DISCLAIMER: These bots are meant for intermediates & experts to run and modify to their liking. There is a lot of prerequisite knowledge about blockchains, private keys, swaps, and GitHub infrastructure that should be known before running a bot. If anyone ever asks you for your private key _do not give it to them_. Nobody from Generation Software, Pooltime, or PoolTogether will ever ask you for your private key.
 
-This repo contains two simple scripts ([index.ts](/index.ts) and [.github/workflows/cron.yml](/.github/workflows/cron.yml)) to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions.
+This repo contains a simple script ([index.ts](/index.ts)) and per-network GitHub Actions workflow files to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions.
+
+---
+
+### Supported Networks (Bookshelf)
+
+Each supported network has its own workflow file. Fork this repo and enable only the workflows for the networks you want to run.
+
+| Network | Chain ID | Required RPC Secret | Workflow File |
+|---|---|---|---|
+| Ethereum Mainnet | 1 | `ETHEREUM_MAINNET_JSON_RPC_URL` | [cron.mainnet.yml](.github/workflows/cron.mainnet.yml) |
+| Arbitrum | 42161 | `ARBITRUM_MAINNET_JSON_RPC_URL` | [cron.arbitrum-mainnet.yml](.github/workflows/cron.arbitrum-mainnet.yml) |
+| Base | 8453 | `BASE_MAINNET_JSON_RPC_URL` | [cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) |
+| Gnosis | 100 | `GNOSIS_MAINNET_JSON_RPC_URL` | [cron.gnosis-mainnet.yml](.github/workflows/cron.gnosis-mainnet.yml) |
+| Optimism | 10 | `OPTIMISM_MAINNET_JSON_RPC_URL` | [cron.optimism-mainnet.yml](.github/workflows/cron.optimism-mainnet.yml) |
+| Scroll | 534352 | `SCROLL_MAINNET_JSON_RPC_URL` | [cron.scroll-mainnet.yml](.github/workflows/cron.scroll-mainnet.yml) |
+| World | 480 | `WORLD_MAINNET_JSON_RPC_URL` | [cron.world-mainnet.yml](.github/workflows/cron.world-mainnet.yml) |
 
 You can simply fork this repo, enter your own custom environment variables in your newly-forked GitHub Repository's Settings (`Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`), and enable automated workflow runs.
 
@@ -90,11 +106,9 @@ To see if the bot is working correctly, check the logs under `Actions`. **You ma
 
 Click the name of the run to see the logs. For instance, one of my runs is simply named "Cronjob". I can open that up, then click on the "Run bot" line to see the outcome of the bot.
 
-#### 5. (Optional) Change Chain, Minimum Profit Threshold (in USD$) or Reward Recipient:
+#### 5. (Optional) Change Minimum Profit Threshold (in USD$) or Reward Recipient:
 
-In the [.github/workflows/cron.yml](/.github/workflows/cron.yml) file you can update the following variables: `CHAIN_ID`, `MIN_PROFIT_THRESHOLD_USD`, and/or `SWAP_RECIPIENT`. This will allow you to change which chain you are running the bot against, how much profit you want to make per transaction, and who (which EVM EOA account) receives the profits earned.
-
-###### `CHAIN_ID`: Simply the chain ID. You can find most chain ID's on [https://chainlist.org/](https://chainlist.org/)
+Each network has its own workflow file (see the [Supported Networks table](#supported-networks-bookshelf) above). Open the relevant file — for example [.github/workflows/cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) for Base — and update the following variables: `MIN_PROFIT_THRESHOLD_USD` and/or `SWAP_RECIPIENT`.
 
 ###### `MIN_PROFIT_THRESHOLD_USD`: This is in $USD, so 0.1 would be $0.10 per transaction
 
