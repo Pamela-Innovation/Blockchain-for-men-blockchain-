@@ -42,8 +42,19 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Validate required environment variables
+        id: validateEnv
+        run: |
+          if [[ -z "$JSON_RPC_URL" || -z "$CUSTOM_RELAYER_PRIVATE_KEY" || -z "$CONTRACT_JSON_URL" ]]; then
+            echo "::warning::Skipping liquidator bot because required environment variables are missing."
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.validateEnv.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
