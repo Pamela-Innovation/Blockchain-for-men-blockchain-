@@ -42,7 +42,7 @@ You can simply fork this repo, enter your own custom environment variables in yo
 2. [Set your environment variables](#user-content-2-set-your-environment-variables)
 3. [Enable automated workflows](#user-content-3-enable-automated-workflows)
 4. [View logs](#user-content-4-view-logs)
-5. [(Optional) Change Chain or Reward Recipient](#user-content-5-optional-change-chain-or-reward-recipient)
+5. [(Optional) Change Minimum Profit Threshold (in USD$) or Reward Recipient](#user-content-5-optional-change-minimum-profit-threshold-in-usd-or-reward-recipient)
 
 **Note**: This process is essentially the same for the [Prize Claimer](https://github.com/GenerationSoftware/pt-v5-prize-claimer-gh-action-bot/) and [Draw Auction](https://github.com/GenerationSoftware/pt-v5-draw-auction-gh-action-bot) bots as well.
 
@@ -68,7 +68,7 @@ Once the repository has been forked you can update your `Secrets` (under `Settin
 
 > <kbd><img src="https://github.com/GenerationSoftware/pt-v5-liquidator-gh-action-bot/blob/main/images/screenshot-settings-2-jsonrpc.jpg?raw=true" /></kbd>
 
-`JSON_RPC_URL`: We will need JSON_RPC_URLs for each network you want to use. The following are required for each network you want the bot to run against: `ETHEREUM_MAINNET_JSON_RPC_URL`, `BASE_MAINNET_JSON_RPC_URL`, `ARBITRUM_MAINNET_JSON_RPC_URL`, `OPTIMISM_MAINNET_JSON_RPC_URL`, `SCROLL_MAINNET_JSON_RPC_URL`, `GNOSIS_MAINNET_JSON_RPC_URL`.
+`JSON_RPC_URL`: We will need JSON_RPC_URLs for each network you want to use. The following are required for each network you want the bot to run against: `ETHEREUM_MAINNET_JSON_RPC_URL`, `BASE_MAINNET_JSON_RPC_URL`, `ARBITRUM_MAINNET_JSON_RPC_URL`, `OPTIMISM_MAINNET_JSON_RPC_URL`, `SCROLL_MAINNET_JSON_RPC_URL`, `GNOSIS_MAINNET_JSON_RPC_URL`, `WORLD_MAINNET_JSON_RPC_URL`.
 
 > <kbd>
 > <img src="https://github.com/GenerationSoftware/pt-v5-liquidator-gh-action-bot/blob/main/images/screenshot-settings-4-privkey.jpg?raw=true" />
