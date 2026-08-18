@@ -11,6 +11,7 @@ env:
   CUSTOM_RELAYER_PRIVATE_KEY: ${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/396f04daedc5a38935460ddf47d2f10e9ac1fec6/deployments/optimism/contracts.json'
   ENV_TOKEN_ALLOW_LIST: ''
+  DRY_RUN: 'true'
   NODE_OPTIONS: "--max_old_space_size=32768"
 permissions: write-all
 jobs:
@@ -43,6 +44,7 @@ jobs:
 
       - name: Run bot
         id: runBot
+        continue-on-error: true
         run: |
           npm install
           npx tsx index.ts

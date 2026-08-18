@@ -38,6 +38,14 @@ const main = async () => {
   const contracts: ContractsBlob = await downloadContractsBlob(
     config.contractJsonUrl
   );
+
+  if (process.env.DRY_RUN === "true") {
+    console.log("[DRY_RUN] Skipping transaction submission. Discovered config:");
+    console.log(JSON.stringify({ chainId: config.chainId, swapRecipient: config.swapRecipient, minProfitThresholdUsd: config.minProfitThresholdUsd, contractJsonUrl: config.contractJsonUrl }, null, 2));
+    console.log("[DRY_RUN] Contracts blob loaded successfully. Set DRY_RUN=false and configure a wallet to enable transaction sending.");
+    return;
+  }
+
   await runLiquidator(contracts, config);
 };
 

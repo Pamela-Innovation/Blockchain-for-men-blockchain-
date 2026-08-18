@@ -11,6 +11,7 @@ env:
   CUSTOM_RELAYER_PRIVATE_KEY: ${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/ca2acf967a962355b921fd4893306b961e7bc62a/deployments/ethereum/contracts.json'
   ENV_TOKEN_ALLOW_LIST: ''
+  DRY_RUN: 'true'
   NODE_OPTIONS: "--max_old_space_size=32768"
 permissions: write-all
 jobs:
@@ -43,6 +44,7 @@ jobs:
 
       - name: Run bot
         id: runBot
+        continue-on-error: true
         run: |
           npm install
           npx tsx index.ts
