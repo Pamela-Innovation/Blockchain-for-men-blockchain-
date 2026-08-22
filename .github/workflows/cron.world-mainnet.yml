@@ -61,8 +61,8 @@ jobs:
           branch: ${{ github.ref }}
           force: true
 
-      - name: Comment Error
-        id: commentError
+      - name: Create Failure Issue
+        id: createFailureIssue
         if: always() && steps.runBot.outcome == 'failure'
         uses: actions/github-script@v7
         continue-on-error: true
@@ -71,5 +71,6 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "${process.env.date}__${process.env.time}": Exit Code 1`
+              title: `Liquidator bot failed for run at "${process.env.date}__${process.env.time}"`,
+              body: `The liquidator bot failed. See the Actions run for details: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             })
