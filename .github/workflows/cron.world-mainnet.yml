@@ -41,13 +41,32 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Preflight required environment
+        id: preflight
+        shell: bash
+        run: |
+          missing=()
+          [[ -n "${JSON_RPC_URL}" ]] || missing+=("JSON_RPC_URL")
+          [[ -n "${CUSTOM_RELAYER_PRIVATE_KEY}" ]] || missing+=("CUSTOM_RELAYER_PRIVATE_KEY")
+          [[ -n "${CONTRACT_JSON_URL}" ]] || missing+=("CONTRACT_JSON_URL")
+
+          if (( ${#missing[@]} > 0 )); then
+            echo "Skipping run; missing required environment variables: ${missing[*]}"
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "can_run=true" >> "$GITHUB_OUTPUT"
+
       - name: Run bot
         id: runBot
+        if: steps.preflight.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.preflight.outputs.can_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +75,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.runBot.outputs.exitcode == 1
+        if: steps.preflight.outputs.can_run == 'true' && failure()
         uses: actions/github-script@v5
         continue-on-error: true
         with:
