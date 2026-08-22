@@ -41,8 +41,18 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Validate required env vars
+        id: validateEnv
+        run: |
+          can_run=true
+          if [ -z "$JSON_RPC_URL" ]; then can_run=false; fi
+          if [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ]; then can_run=false; fi
+          if [ -z "$CONTRACT_JSON_URL" ]; then can_run=false; fi
+          echo "can_run=$can_run" >> "$GITHUB_OUTPUT"
+
       - name: Run bot
         id: runBot
+        if: steps.validateEnv.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
