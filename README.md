@@ -108,7 +108,7 @@ Click the name of the run to see the logs. For instance, one of my runs is simpl
 
 #### 5. (Optional) Change Minimum Profit Threshold (in USD$) or Reward Recipient:
 
-Each network has its own workflow file (see the [Supported Networks table](#supported-networks-bookshelf) above). Open the relevant file — for example [.github/workflows/cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) for Base — and update the following variables: `MIN_PROFIT_THRESHOLD_USD` and/or `SWAP_RECIPIENT`.
+Each network has its own workflow file (see the [Supported Networks table](#supported-networks-bookshelf) above). Open the relevant file — for example [.github/workflows/cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) for Base — and update the following variables: `MIN_PROFIT_THRESHOLD_USD` and/or `SWAP_RECIPIENT`. If you add `DRY_RUN: 'true'`, the bot will only print discovered config and will not submit transactions; keep `DRY_RUN` unset (or set it to `'false'`) for live liquidations.
 
 ###### `MIN_PROFIT_THRESHOLD_USD`: This is in $USD, so 0.1 would be $0.10 per transaction
 
