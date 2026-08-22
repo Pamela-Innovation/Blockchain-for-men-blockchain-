@@ -76,9 +76,12 @@ jobs:
           force: true
       - name: Comment Error
         id: commentError
-        if: always() && steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
+        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
         uses: actions/github-script@v5
         continue-on-error: true
+        env:
+          RUN_DATE: ${{ env.RUN_DATE }}
+          RUN_TIME: ${{ env.RUN_TIME }}
         with:
           script: |
             await github.rest.issues.create({
@@ -88,6 +91,6 @@ jobs:
             })
 
       - name: Fail workflow when bot fails
-        if: always() && steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
+        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
         run: exit 1
 
