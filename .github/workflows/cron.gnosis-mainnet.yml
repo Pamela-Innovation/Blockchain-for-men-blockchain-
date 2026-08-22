@@ -43,6 +43,7 @@ jobs:
 
       - name: Preflight required env vars
         id: preflight
+        shell: bash
         run: |
           missing=0
           for var in JSON_RPC_URL CUSTOM_RELAYER_PRIVATE_KEY CONTRACT_JSON_URL; do
