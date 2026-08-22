@@ -36,26 +36,28 @@ jobs:
 
       - name: Store current date
         id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+        run: echo "RUN_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
       
       - name: Store current time
         id: time
-        run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
+        run: echo "RUN_TIME=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
       - name: Preflight required env
         id: preflight
         shell: bash
         run: |
+          can_run=false
+          trap 'echo "can_run=${can_run}" >> "$GITHUB_OUTPUT"' EXIT
+
           missing=()
           [[ -n "${JSON_RPC_URL}" ]] || missing+=("JSON_RPC_URL")
           [[ -n "${CUSTOM_RELAYER_PRIVATE_KEY}" ]] || missing+=("CUSTOM_RELAYER_PRIVATE_KEY")
           [[ -n "${CONTRACT_JSON_URL}" ]] || missing+=("CONTRACT_JSON_URL")
 
           if [ "${#missing[@]}" -gt 0 ]; then
-            echo "can_run=false" >> "$GITHUB_OUTPUT"
             echo "::warning::Skipping bot run because required environment variables are missing: ${missing[*]}"
           else
-            echo "can_run=true" >> "$GITHUB_OUTPUT"
+            can_run=true
           fi
 
       - name: Run bot
@@ -84,7 +86,7 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at ${process.env.date ?? 'unknown'}__${process.env.time ?? 'unknown'}: Exit Code 1`
+              title: `Liquidator bot failed for run at ${process.env.RUN_DATE ?? 'unknown'}__${process.env.RUN_TIME ?? 'unknown'}: Exit Code 1`
             })
 
       - name: Fail workflow when bot fails
