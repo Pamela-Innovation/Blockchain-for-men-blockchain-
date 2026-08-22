@@ -75,7 +75,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.preflight.outputs.can_run == 'true' && failure()
+        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.conclusion == 'failure'
         uses: actions/github-script@v5
         continue-on-error: true
         with:
