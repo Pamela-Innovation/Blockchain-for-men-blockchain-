@@ -106,13 +106,15 @@ To see if the bot is working correctly, check the logs under `Actions`. **You ma
 
 Click the name of the run to see the logs. For instance, one of my runs is simply named "Cronjob". I can open that up, then click on the "Run bot" line to see the outcome of the bot.
 
-#### 5. (Optional) Change Minimum Profit Threshold (in USD$) or Reward Recipient:
+#### 5. (Optional) Change Minimum Profit Threshold (in USD$), Reward Recipient, or DRY_RUN mode:
 
-Each network has its own workflow file (see the [Supported Networks table](#supported-networks-bookshelf) above). Open the relevant file — for example [.github/workflows/cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) for Base — and update the following variables: `MIN_PROFIT_THRESHOLD_USD` and/or `SWAP_RECIPIENT`.
+Each network has its own workflow file (see the [Supported Networks table](#supported-networks-bookshelf) above). Open the relevant file — for example [.github/workflows/cron.base-mainnet.yml](.github/workflows/cron.base-mainnet.yml) for Base — and update the following variables: `MIN_PROFIT_THRESHOLD_USD`, `SWAP_RECIPIENT`, and/or `DRY_RUN`.
 
 ###### `MIN_PROFIT_THRESHOLD_USD`: This is in $USD, so 0.1 would be $0.10 per transaction
 
 ###### `SWAP_RECIPIENT`: Any typical account address, if left blank this will default to the relayer account set by the `CUSTOM_RELAYER_PRIVATE_KEY` variable.
+
+###### `DRY_RUN`: When set to `'true'`, the bot will log discovered configuration and available liquidations but **will not submit any transactions**. This is useful for validating your setup without spending gas. Set to `'false'` (the default) to run the bot live and submit liquidation transactions.
 
 ## Lastly:
 
