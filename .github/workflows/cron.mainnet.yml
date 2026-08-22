@@ -41,15 +41,51 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Preflight required env
+        id: preflight
+        shell: bash
+        run: |
+          missing=()
+          [[ -n "${JSON_RPC_URL}" ]] || missing+=("JSON_RPC_URL")
+          [[ -n "${CUSTOM_RELAYER_PRIVATE_KEY}" ]] || missing+=("CUSTOM_RELAYER_PRIVATE_KEY")
+          [[ -n "${CONTRACT_JSON_URL}" ]] || missing+=("CONTRACT_JSON_URL")
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping bot run because required environment variables are missing: ${missing[*]}"
+          else
+            echo "can_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
+        if: steps.preflight.outputs.can_run == 'true'
         id: runBot
+        continue-on-error: true
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'success'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           force: true
+      - name: Comment Error
+        id: commentError
+        if: always() && steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
+        uses: actions/github-script@v5
+        continue-on-error: true
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Liquidator bot failed for run at ${process.env.date}__${process.env.time}: Exit Code 1`
+            })
+
+      - name: Fail workflow when bot fails
+        if: always() && steps.preflight.outputs.can_run == 'true' && steps.runBot.outcome == 'failure'
+        run: exit 1
+
