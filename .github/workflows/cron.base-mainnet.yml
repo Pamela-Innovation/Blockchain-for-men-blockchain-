@@ -43,24 +43,34 @@ jobs:
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
       - name: Check required bot configuration
-        if: ${{ env.JSON_RPC_URL == '' || env.CUSTOM_RELAYER_PRIVATE_KEY == '' || env.CONTRACT_JSON_URL == '' }}
+        id: preflight
+        env:
+          JSON_RPC_URL_MISSING: ${{ env.JSON_RPC_URL == '' }}
+          CUSTOM_RELAYER_PRIVATE_KEY_MISSING: ${{ env.CUSTOM_RELAYER_PRIVATE_KEY == '' }}
+          CONTRACT_JSON_URL_MISSING: ${{ env.CONTRACT_JSON_URL == '' }}
         run: |
           missing_vars=()
-          [ -n "${JSON_RPC_URL}" ] || missing_vars+=("JSON_RPC_URL")
-          [ -n "${CUSTOM_RELAYER_PRIVATE_KEY}" ] || missing_vars+=("CUSTOM_RELAYER_PRIVATE_KEY")
-          [ -n "${CONTRACT_JSON_URL}" ] || missing_vars+=("CONTRACT_JSON_URL")
+          [ "${JSON_RPC_URL_MISSING}" = "true" ] && missing_vars+=("JSON_RPC_URL")
+          [ "${CUSTOM_RELAYER_PRIVATE_KEY_MISSING}" = "true" ] && missing_vars+=("CUSTOM_RELAYER_PRIVATE_KEY")
+          [ "${CONTRACT_JSON_URL_MISSING}" = "true" ] && missing_vars+=("CONTRACT_JSON_URL")
 
-          echo "Skipping bot run because the following required environment variables are missing: ${missing_vars[*]}"
+          if [ ${#missing_vars[@]} -gt 0 ]; then
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping bot run because the following required environment variables are missing: ${missing_vars[*]}"
+            exit 0
+          fi
+
+          echo "can_run=true" >> "$GITHUB_OUTPUT"
 
       - name: Run bot
         id: runBot
-        if: ${{ env.JSON_RPC_URL != '' && env.CUSTOM_RELAYER_PRIVATE_KEY != '' && env.CONTRACT_JSON_URL != '' }}
+        if: steps.preflight.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
-        if: ${{ env.JSON_RPC_URL != '' && env.CUSTOM_RELAYER_PRIVATE_KEY != '' && env.CONTRACT_JSON_URL != '' }}
+        if: steps.preflight.outputs.can_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -69,7 +79,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: ${{ failure() && env.JSON_RPC_URL != '' && env.CUSTOM_RELAYER_PRIVATE_KEY != '' && env.CONTRACT_JSON_URL != '' }}
+        if: ${{ failure() && steps.preflight.outputs.can_run == 'true' }}
         uses: actions/github-script@v5
         continue-on-error: true
         with:
