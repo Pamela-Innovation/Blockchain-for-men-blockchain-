@@ -72,6 +72,7 @@ const parseArgs = () => {
           "  --base-url <url>             Override API base URL",
           "  --include-hex                Fetch /tx/<txid>/hex and summarize",
           "  --block-header-hex <hex>     Verify merkle proof against provided header hex (first 80 bytes used)",
+          "  (No --txid means auto-pick from mempool endpoints only.)",
         ].join("\n")
       );
       process.exit(0);

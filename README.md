@@ -117,6 +117,8 @@ Common usage:
 - Verify merkle proof against a known 80-byte block header hex:
   - `npm run analyze:liquid-api -- --txid <txid> --block-header-hex <header_hex>`
 
+Note: auto-pick mode only selects transactions from mempool endpoints. To analyze a confirmed historical transaction directly, provide `--txid`.
+
 ## Lastly:
 
 The Liquidator bot's relayer account needs to be stocked with ETH (to pay gas fees for transactions) and WETH to liquidate. We recommend keeping less than $100 in value on the relayer at a time in case your private key were to get compromised.
