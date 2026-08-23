@@ -64,7 +64,7 @@ const parseArgs = () => {
           "  --txid <txid>                Analyze a specific transaction",
           "  --base-url <url>             Override API base URL",
           "  --include-hex                Fetch /tx/<txid>/hex and summarize",
-          "  --block-header-hex <hex>     Verify merkle proof against provided block header hex",
+          "  --block-header-hex <hex>     Verify merkle proof against provided header hex (first 80 bytes used)",
         ].join("\n")
       );
       process.exit(0);
@@ -122,23 +122,22 @@ const computeMerkleRoot = (txid: string, siblings: string[], pos: number): strin
 
 const getMerkleRootFromHeader = (headerHex: string): string => {
   const header = Buffer.from(headerHex.trim(), "hex");
-  if (header.length !== 80) {
-    throw new Error(`Block header must be 80 bytes (got ${header.length})`);
+  if (header.length < 80) {
+    throw new Error(`Block header hex must include at least 80 bytes (got ${header.length})`);
   }
   return Buffer.from(header.subarray(36, 68)).reverse().toString("hex");
 };
 
 const summarizeHex = (hex: string): JsonObject => {
   const bytes = Buffer.from(hex.trim(), "hex");
-  if (bytes.length < 8) {
+  if (bytes.length < 4) {
     return { serialized_size_bytes: bytes.length };
   }
   const version = bytes.readUInt32LE(0);
-  const locktime = bytes.readUInt32LE(bytes.length - 4);
   return {
     serialized_size_bytes: bytes.length,
     version,
-    locktime,
+    note: "Locktime is omitted from raw summary because Liquid serialization contains witness/extension data.",
   };
 };
 
