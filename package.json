@@ -12,7 +12,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "tsx index.ts"
+        "start": "tsx index.ts",
+        "analyze:liquid-api": "tsx scripts/liquid-api-analyzer.ts"
     },
     "devDependencies": {
         "@generationsoftware/pt-v5-autotasks-library": "1.9.6",
