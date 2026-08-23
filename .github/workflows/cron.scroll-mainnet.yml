@@ -47,7 +47,7 @@ jobs:
           missing=0
 
           if [ -z "$JSON_RPC_URL" ]; then
-            echo "::warning::Missing JSON_RPC_URL secret; skipping bot run."
+            echo "::warning::Missing SCROLL_MAINNET_JSON_RPC_URL secret; skipping bot run."
             missing=1
           fi
 
@@ -75,7 +75,7 @@ jobs:
           npx tsx index.ts
 
       - name: Push changes (if required)
-        if: steps.preflight.outputs.can_run == 'true'
+        if: steps.preflight.outputs.can_run == 'true' && success()
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Comment Error
         id: commentError
-        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.outputs.exitcode == 1
+        if: steps.preflight.outputs.can_run == 'true' && failure() && steps.runBot.outcome == 'failure'
         uses: actions/github-script@v5
         continue-on-error: true
         with:
