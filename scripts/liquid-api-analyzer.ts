@@ -41,19 +41,26 @@ const parseArgs = () => {
     includeHex: boolean;
     blockHeaderHex?: string;
   } = { baseUrl: DEFAULT_BASE_URL, includeHex: false };
+  const requireValue = (flag: string, index: number): string => {
+    const value = args[index + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error(`Missing value for ${flag}`);
+    }
+    return value;
+  };
 
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === "--txid") {
-      options.txid = args[i + 1];
+      options.txid = requireValue(arg, i);
       i += 1;
     } else if (arg === "--base-url") {
-      options.baseUrl = args[i + 1] ?? DEFAULT_BASE_URL;
+      options.baseUrl = requireValue(arg, i);
       i += 1;
     } else if (arg === "--include-hex") {
       options.includeHex = true;
     } else if (arg === "--block-header-hex") {
-      options.blockHeaderHex = args[i + 1];
+      options.blockHeaderHex = requireValue(arg, i);
       i += 1;
     } else if (arg === "--help") {
       console.log(
@@ -104,7 +111,7 @@ const pickWorkingTxid = async (baseUrl: string): Promise<TxSummary> => {
   throw new Error("No mempool transactions returned by API");
 };
 
-const dsha256 = (buf: Buffer): Buffer => {
+const doubleSha256 = (buf: Buffer): Buffer => {
   return createHash("sha256").update(createHash("sha256").update(buf).digest()).digest();
 };
 
@@ -114,7 +121,7 @@ const computeMerkleRoot = (txid: string, siblings: string[], pos: number): strin
   for (const sibling of siblings) {
     const siblingHash = Buffer.from(sibling, "hex").reverse();
     const pair = index % 2 === 0 ? Buffer.concat([hash, siblingHash]) : Buffer.concat([siblingHash, hash]);
-    hash = dsha256(pair);
+    hash = doubleSha256(pair);
     index = Math.floor(index / 2);
   }
   return Buffer.from(hash).reverse().toString("hex");
