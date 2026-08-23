@@ -100,6 +100,23 @@ In the [.github/workflows/cron.yml](/.github/workflows/cron.yml) file you can up
 
 ###### `SWAP_RECIPIENT`: Any typical account address, if left blank this will default to the relayer account set by the `CUSTOM_RELAYER_PRIVATE_KEY` variable.
 
+## Liquid API transaction analyzer (optional)
+
+This repository now includes a helper script to inspect Liquid API endpoints for a sample transaction and print a single JSON report.
+
+Run:
+
+`npm run analyze:liquid-api -- --help`
+
+Common usage:
+
+- Auto-pick a txid from mempool:
+  - `npm run analyze:liquid-api`
+- Analyze a specific txid and include raw hex summary:
+  - `npm run analyze:liquid-api -- --txid <txid> --include-hex`
+- Verify merkle proof against a known 80-byte block header hex:
+  - `npm run analyze:liquid-api -- --txid <txid> --block-header-hex <header_hex>`
+
 ## Lastly:
 
 The Liquidator bot's relayer account needs to be stocked with ETH (to pay gas fees for transactions) and WETH to liquidate. We recommend keeping less than $100 in value on the relayer at a time in case your private key were to get compromised.
