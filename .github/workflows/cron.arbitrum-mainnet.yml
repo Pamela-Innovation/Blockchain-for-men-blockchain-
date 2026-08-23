@@ -1,7 +1,10 @@
-name: CronJob - Liquidator Bot - Arbitrum
+name: CronJob - Liquidator Bot - Arbitrum Mainnet
+
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+    - cron: "50 * * * *"
+
 env:
   CHAIN_ID: 42161
   MIN_PROFIT_THRESHOLD_USD: 0.5
@@ -12,57 +15,96 @@ env:
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/bc9e4b4c25a033ec3c1c2b89b62422399b7db2f6/deployments/arbitrum/contracts.json'
   ENV_TOKEN_ALLOW_LIST: '0x8653084e01bd8c9e24b9a8feb2036251ee0c16a9,0x0000206329b97DB379d5E1Bf586BbDB969C63274'
   NODE_OPTIONS: "--max_old_space_size=32768"
-permissions: write-all
+
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   runCLI:
     name: Liquidator Bot
-    runs-on: ${{ matrix.os }}
-    strategy:
-      max-parallel: 1
-      matrix:
-        node: ["20.11.1"]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      
-      - name: Use Node ${{ matrix.node }}
+
+      - name: Use Node 20.11.1
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20.11.1
 
-      - name: Store current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
-      
-      - name: Store current time
-        id: time
-        run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
+      - name: Preflight required secrets
+        id: preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          for key in JSON_RPC_URL CUSTOM_RELAYER_PRIVATE_KEY CONTRACT_JSON_URL COVALENT_API_KEY; do
+            if [ -z "${!key:-}" ]; then
+              missing+=("$key")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            echo "missing_secrets=${missing[*]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "can_run=true" >> "$GITHUB_OUTPUT"
+            echo "missing_secrets=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.can_run == 'true'
+        run: npm ci
 
       - name: Run bot
         id: runBot
-        run: |
-          npm install
-          npx tsx index.ts
+        if: steps.preflight.outputs.can_run == 'true'
+        run: npx tsx index.ts
 
       - name: Push changes (if required)
+        if: success() && steps.preflight.outputs.can_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           force: true
 
-      - name: Comment Error
-        id: commentError
-        if: steps.runBot.outputs.exitcode == 1
-        uses: actions/github-script@v5
+      - name: Open issue on bot failure
+        if: failure() && steps.preflight.outputs.can_run == 'true'
+        uses: actions/github-script@v7
         continue-on-error: true
         with:
           script: |
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "$date"__"$time": Exit Code 1`
+              title: `Liquidator bot failed: ${context.workflow} #${context.runNumber}`,
+              body: `Run URL: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             })
+
+      - name: Publish run summary
+        if: always()
+        shell: bash
+        run: |
+          status="${{ job.status }}"
+          can_run="${{ steps.preflight.outputs.can_run }}"
+          if [ "$can_run" != "true" ]; then
+            run_status="skipped"
+          elif [ "$status" = "success" ]; then
+            run_status="success"
+          else
+            run_status="failed"
+          fi
+
+          {
+            echo "### Liquidator bot run summary"
+            echo "- Chain ID: ${CHAIN_ID}"
+            echo "- Run status: ${run_status}"
+            if [ "$run_status" = "skipped" ]; then
+              echo "- Missing required secrets: ${{ steps.preflight.outputs.missing_secrets }}"
+            fi
+            echo "- Workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } >> "$GITHUB_STEP_SUMMARY"

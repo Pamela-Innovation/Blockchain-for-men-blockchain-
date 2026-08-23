@@ -2,7 +2,7 @@
 
 ### DISCLAIMER: These bots are meant for intermediates & experts to run and modify to their liking. There is a lot of prerequisite knowledge about blockchains, private keys, swaps, and GitHub infrastructure that should be known before running a bot. If anyone ever asks you for your private key _do not give it to them_. Nobody from Generation Software, Pooltime, or PoolTogether will ever ask you for your private key.
 
-This repo contains two simple scripts ([index.ts](/index.ts) and [.github/workflows/cron.yml](/.github/workflows/cron.yml)) to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions.
+This repo contains a core bot runtime script ([index.ts](/index.ts)) and chain-specific workflow automation under [`.github/workflows/`](/.github/workflows) to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions.
 
 You can simply fork this repo, enter your own custom environment variables in your newly-forked GitHub Repository's Settings (`Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`), and enable automated workflow runs.
 
@@ -92,7 +92,7 @@ Click the name of the run to see the logs. For instance, one of my runs is simpl
 
 #### 5. (Optional) Change Chain, Minimum Profit Threshold (in USD$) or Reward Recipient:
 
-In the [.github/workflows/cron.yml](/.github/workflows/cron.yml) file you can update the following variables: `CHAIN_ID`, `MIN_PROFIT_THRESHOLD_USD`, and/or `SWAP_RECIPIENT`. This will allow you to change which chain you are running the bot against, how much profit you want to make per transaction, and who (which EVM EOA account) receives the profits earned.
+In the relevant chain workflow file under [`.github/workflows/`](/.github/workflows/) (for example, `.github/workflows/cron.base-mainnet.yml`) you can update the following variables: `CHAIN_ID`, `MIN_PROFIT_THRESHOLD_USD`, and/or `SWAP_RECIPIENT`. This will allow you to change which chain you are running the bot against, how much profit you want to make per transaction, and who (which EVM EOA account) receives the profits earned.
 
 ###### `CHAIN_ID`: Simply the chain ID. You can find most chain ID's on [https://chainlist.org/](https://chainlist.org/)
 
@@ -103,6 +103,11 @@ In the [.github/workflows/cron.yml](/.github/workflows/cron.yml) file you can up
 ## Lastly:
 
 The Liquidator bot's relayer account needs to be stocked with ETH (to pay gas fees for transactions) and WETH to liquidate. We recommend keeping less than $100 in value on the relayer at a time in case your private key were to get compromised.
+
+## Operations docs
+
+- Payment policy and runbook source of truth: [`docs/operations/auto-bot-operations.md`](/docs/operations/auto-bot-operations.md)
+- Operations docs index: [`docs/operations/README.md`](/docs/operations/README.md)
 
 ---
 
