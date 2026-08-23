@@ -118,7 +118,7 @@ Common usage:
   - `npm run analyze:liquid-api -- --txid <txid> --block-header-hex <header_hex>`
 
 Note: auto-pick mode only selects transactions from mempool endpoints. To analyze a confirmed historical transaction directly, provide `--txid`.
-Note: merkle verification output is a Bitcoin-style compatibility check against the first 80-byte header prefix and is reported with its assumption in the JSON output.
+Note: merkle verification output is a Bitcoin-style compatibility check against the first 80-byte header prefix and is reported with its assumption in the JSON output; some Liquid witness-merkle variants may not match this check.
 
 ## Lastly:
 

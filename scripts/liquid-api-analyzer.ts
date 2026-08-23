@@ -103,6 +103,9 @@ const pickWorkingTxid = async (baseUrl: string): Promise<TxSummary> => {
   if (recent.length > 0 && recent[0].txid) {
     return recent[0];
   }
+  if (recent.length > 0 && !recent[0].txid) {
+    throw new Error("mempool/recent returned entries but first entry has no txid");
+  }
 
   const txids = await fetchJson<string[]>(`${baseUrl}/mempool/txids`);
   if (txids.length > 0) {
@@ -117,6 +120,7 @@ const doubleSha256 = (buf: Buffer): Buffer => {
 };
 
 const computeMerkleRootBitcoinStyle = (txid: string, siblings: string[], pos: number): string => {
+  // Convention here: `hash` is always kept in internal little-endian byte order during hashing.
   let hash = Buffer.from(txid, "hex").reverse();
   let index = pos;
   for (const sibling of siblings) {
@@ -190,7 +194,7 @@ const main = async () => {
         const headerRoot = getMerkleRootFromHeaderPrefix(options.blockHeaderHex);
         report.merkle_verification = {
           assumption:
-            "Uses Bitcoin-style txid/sibling double-SHA256 path and the first 80-byte header prefix merkle-root slot.",
+            "Uses Bitcoin-style txid/sibling double-SHA256 path and the first 80-byte header prefix merkle-root slot; this may not match all Liquid witness-merkle variants.",
           computed_root: computedRoot,
           header_merkle_root: headerRoot,
           verified: computedRoot === headerRoot,
