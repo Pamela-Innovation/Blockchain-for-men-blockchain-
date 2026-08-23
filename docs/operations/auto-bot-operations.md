@@ -76,7 +76,7 @@ Run status conventions:
 Where to check:
 
 - GitHub Actions workflow run list and per-run step logs.
-- `Open issue on bot failure` issues.
+- GitHub issues created by the `Open issue on bot failure` workflow step.
 - Workflow step summaries.
 
 Operator checklist:
@@ -100,7 +100,7 @@ Operator checklist:
 - Maintain 90-day standard rotation cadence.
 - Rotate immediately on exposure suspicion, role changes, or vendor incidents.
 
-See `/home/runner/work/Blockchain-for-men-blockchain-/Blockchain-for-men-blockchain-/SECURITY_KEYS_POLICY.md` for full key policy details.
+See [`SECURITY_KEYS_POLICY.md`](/SECURITY_KEYS_POLICY.md) for full key policy details.
 
 ## 7) Rollout sequence
 
