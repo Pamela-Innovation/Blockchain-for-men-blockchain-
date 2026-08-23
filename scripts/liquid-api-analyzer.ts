@@ -116,7 +116,7 @@ const doubleSha256 = (buf: Buffer): Buffer => {
   return createHash("sha256").update(createHash("sha256").update(buf).digest()).digest();
 };
 
-const computeMerkleRoot = (txid: string, siblings: string[], pos: number): string => {
+const computeMerkleRootBitcoinStyle = (txid: string, siblings: string[], pos: number): string => {
   let hash = Buffer.from(txid, "hex").reverse();
   let index = pos;
   for (const sibling of siblings) {
@@ -128,7 +128,7 @@ const computeMerkleRoot = (txid: string, siblings: string[], pos: number): strin
   return Buffer.from(hash).reverse().toString("hex");
 };
 
-const getMerkleRootFromHeader = (headerHex: string): string => {
+const getMerkleRootFromHeaderPrefix = (headerHex: string): string => {
   const header = Buffer.from(headerHex.trim(), "hex");
   if (header.length < 80) {
     throw new Error(`Block header hex must include at least 80 bytes (got ${header.length})`);
@@ -186,9 +186,11 @@ const main = async () => {
       report.outspends = await fetchJson<JsonObject[]>(`${options.baseUrl}/tx/${workingTx.txid}/outspends`);
 
       if (options.blockHeaderHex) {
-        const computedRoot = computeMerkleRoot(workingTx.txid, proof.merkle, proof.pos);
-        const headerRoot = getMerkleRootFromHeader(options.blockHeaderHex);
+        const computedRoot = computeMerkleRootBitcoinStyle(workingTx.txid, proof.merkle, proof.pos);
+        const headerRoot = getMerkleRootFromHeaderPrefix(options.blockHeaderHex);
         report.merkle_verification = {
+          assumption:
+            "Uses Bitcoin-style txid/sibling double-SHA256 path and the first 80-byte header prefix merkle-root slot.",
           computed_root: computedRoot,
           header_merkle_root: headerRoot,
           verified: computedRoot === headerRoot,
