@@ -100,10 +100,10 @@ const fetchText = async (url: string): Promise<string> => {
 
 const pickWorkingTxid = async (baseUrl: string): Promise<TxSummary> => {
   const recent = await fetchJson<TxSummary[]>(`${baseUrl}/mempool/recent`);
-  if (recent.length > 0 && recent[0].txid) {
-    return recent[0];
-  }
-  if (recent.length > 0 && !recent[0].txid) {
+  if (recent.length > 0) {
+    if (recent[0].txid) {
+      return recent[0];
+    }
     throw new Error("mempool/recent returned entries but first entry has no txid");
   }
 
@@ -145,6 +145,7 @@ const summarizeHex = (hex: string): JsonObject => {
   if (bytes.length < 4) {
     return { serialized_size_bytes: bytes.length };
   }
+  // Version is in the first 4 bytes for standard Bitcoin-compatible transaction serialization.
   const version = bytes.readUInt32LE(0);
   return {
     serialized_size_bytes: bytes.length,
