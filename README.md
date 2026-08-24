@@ -2,7 +2,7 @@
 
 ### DISCLAIMER: These bots are meant for intermediates & experts to run and modify to their liking. There is a lot of prerequisite knowledge about blockchains, private keys, swaps, and GitHub infrastructure that should be known before running a bot. If anyone ever asks you for your private key _do not give it to them_. Nobody from Generation Software, Pooltime, or PoolTogether will ever ask you for your private key.
 
-This repo contains two simple scripts ([index.ts](/index.ts) and [.github/workflows/cron.yml](/.github/workflows/cron.yml)) to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions.
+This repo contains two simple scripts ([index.ts](/index.ts) and [.github/workflows/cron.liquidator.yml](/.github/workflows/cron.liquidator.yml)) to run the Generation Software PoolTogether v5 Liquidator bot using GitHub Actions. A single consolidated workflow runs the bot across all supported chains every hour.
 
 You can simply fork this repo, enter your own custom environment variables in your newly-forked GitHub Repository's Settings (`Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`), and enable automated workflow runs.
 
@@ -52,7 +52,7 @@ Once the repository has been forked you can update your `Secrets` (under `Settin
 
 > <kbd><img src="https://github.com/GenerationSoftware/pt-v5-liquidator-gh-action-bot/blob/main/images/screenshot-settings-2-jsonrpc.jpg?raw=true" /></kbd>
 
-`JSON_RPC_URL`: We will need JSON_RPC_URLs for each network you want to use. The following are required for each network you want the bot to run against: `ETHEREUM_MAINNET_JSON_RPC_URL`, `BASE_MAINNET_JSON_RPC_URL`, `ARBITRUM_MAINNET_JSON_RPC_URL`, `OPTIMISM_MAINNET_JSON_RPC_URL`, `SCROLL_MAINNET_JSON_RPC_URL`, `GNOSIS_MAINNET_JSON_RPC_URL`.
+`JSON_RPC_URL`: We will need JSON_RPC_URLs for each network you want to use. The following are required for each network you want the bot to run against: `ETHEREUM_MAINNET_JSON_RPC_URL`, `BASE_MAINNET_JSON_RPC_URL`, `ARBITRUM_MAINNET_JSON_RPC_URL`, `OPTIMISM_MAINNET_JSON_RPC_URL`, `SCROLL_MAINNET_JSON_RPC_URL`, `GNOSIS_MAINNET_JSON_RPC_URL`, `WORLD_MAINNET_JSON_RPC_URL`.
 
 > <kbd>
 > <img src="https://github.com/GenerationSoftware/pt-v5-liquidator-gh-action-bot/blob/main/images/screenshot-settings-4-privkey.jpg?raw=true" />
@@ -92,7 +92,21 @@ Click the name of the run to see the logs. For instance, one of my runs is simpl
 
 #### 5. (Optional) Change Chain, Minimum Profit Threshold (in USD$) or Reward Recipient:
 
-In the [.github/workflows/cron.yml](/.github/workflows/cron.yml) file you can update the following variables: `CHAIN_ID`, `MIN_PROFIT_THRESHOLD_USD`, and/or `SWAP_RECIPIENT`. This will allow you to change which chain you are running the bot against, how much profit you want to make per transaction, and who (which EVM EOA account) receives the profits earned.
+The bot runs across all supported chains via a single consolidated workflow file: [.github/workflows/cron.liquidator.yml](/.github/workflows/cron.liquidator.yml). Each chain's configuration is defined in the `matrix.include` section of that file. You can update `MIN_PROFIT_THRESHOLD_USD` and/or `SWAP_RECIPIENT` per chain there.
+
+##### Supported Chains
+
+| Network | Chain ID | Min Profit (USD) | RPC Secret | Claim Rewards |
+|---|---|---|---|---|
+| Ethereum | 1 | $90 | `ETHEREUM_MAINNET_JSON_RPC_URL` | |
+| Arbitrum | 42161 | $0.50 | `ARBITRUM_MAINNET_JSON_RPC_URL` | |
+| Base | 8453 | $0.50 | `BASE_MAINNET_JSON_RPC_URL` | ✅ |
+| Gnosis | 100 | $0.50 | `GNOSIS_MAINNET_JSON_RPC_URL` | |
+| Optimism | 10 | $0.50 | `OPTIMISM_MAINNET_JSON_RPC_URL` | |
+| Scroll | 534352 | $0.50 | `SCROLL_MAINNET_JSON_RPC_URL` | |
+| World | 480 | $0.20 | `WORLD_MAINNET_JSON_RPC_URL` | |
+
+If a chain's RPC secret is not set, the bot will **skip that chain gracefully** rather than failing the workflow.
 
 ###### `CHAIN_ID`: Simply the chain ID. You can find most chain ID's on [https://chainlist.org/](https://chainlist.org/)
 

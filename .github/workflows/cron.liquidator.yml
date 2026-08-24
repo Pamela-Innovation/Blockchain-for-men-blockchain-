@@ -1,0 +1,131 @@
+name: CronJob - Liquidator Bot
+on:
+  schedule:
+    - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+env:
+  SWAP_RECIPIENT: ''
+  COVALENT_API_KEY: ${{ secrets.COVALENT_API_KEY }}
+  CUSTOM_RELAYER_PRIVATE_KEY: ${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}
+  NODE_OPTIONS: "--max_old_space_size=32768"
+permissions: write-all
+jobs:
+  runCLI:
+    name: Liquidator Bot - ${{ matrix.network }}
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        include:
+          - network: Ethereum
+            chain_id: 1
+            min_profit: 90
+            json_rpc_secret: ETHEREUM_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/ca2acf967a962355b921fd4893306b961e7bc62a/deployments/ethereum/contracts.json'
+            token_allow_list: ''
+            claim_rewards: ''
+          - network: Arbitrum
+            chain_id: 42161
+            min_profit: 0.5
+            json_rpc_secret: ARBITRUM_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/bc9e4b4c25a033ec3c1c2b89b62422399b7db2f6/deployments/arbitrum/contracts.json'
+            token_allow_list: '0x8653084e01bd8c9e24b9a8feb2036251ee0c16a9,0x0000206329b97DB379d5E1Bf586BbDB969C63274'
+            claim_rewards: ''
+          - network: Base
+            chain_id: 8453
+            min_profit: 0.5
+            json_rpc_secret: BASE_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/bc84c3f5e1d9703372ae7f9baf584bab42f47b27/deployments/base/contracts.json'
+            token_allow_list: ''
+            claim_rewards: 'true'
+          - network: Gnosis
+            chain_id: 100
+            min_profit: 0.5
+            json_rpc_secret: GNOSIS_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/196aa20f4a0b3e651d0504ffeb0e1b9a08c7ccb6/deployments/gnosis/contracts.json'
+            token_allow_list: ''
+            claim_rewards: ''
+          - network: Optimism
+            chain_id: 10
+            min_profit: 0.5
+            json_rpc_secret: OPTIMISM_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/396f04daedc5a38935460ddf47d2f10e9ac1fec6/deployments/optimism/contracts.json'
+            token_allow_list: ''
+            claim_rewards: ''
+          - network: Scroll
+            chain_id: 534352
+            min_profit: 0.5
+            json_rpc_secret: SCROLL_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/196aa20f4a0b3e651d0504ffeb0e1b9a08c7ccb6/deployments/scroll/contracts.json'
+            token_allow_list: ''
+            claim_rewards: ''
+          - network: World
+            chain_id: 480
+            min_profit: 0.2
+            json_rpc_secret: WORLD_MAINNET_JSON_RPC_URL
+            contract_json_url: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/8e1432b70c1f135966c1b70917675cd586dda7be/deployments/world/contracts.json'
+            token_allow_list: ''
+            claim_rewards: ''
+    env:
+      CHAIN_ID: ${{ matrix.chain_id }}
+      MIN_PROFIT_THRESHOLD_USD: ${{ matrix.min_profit }}
+      JSON_RPC_URL: ${{ secrets[matrix.json_rpc_secret] }}
+      CONTRACT_JSON_URL: ${{ matrix.contract_json_url }}
+      ENV_TOKEN_ALLOW_LIST: ${{ matrix.token_allow_list }}
+      CLAIM_REWARDS: ${{ matrix.claim_rewards }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Use Node 20.11.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+
+      - name: Store current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+
+      - name: Store current time
+        id: time
+        run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
+
+      - name: Preflight check
+        id: preflight
+        run: |
+          can_run=true
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ] || [ -z "$CONTRACT_JSON_URL" ]; then
+            echo "Skipping: required environment variables (JSON_RPC_URL, CUSTOM_RELAYER_PRIVATE_KEY, CONTRACT_JSON_URL) are not set."
+            can_run=false
+          fi
+          echo "can_run=$can_run" >> "$GITHUB_OUTPUT"
+
+      - name: Run bot
+        id: runBot
+        if: steps.preflight.outputs.can_run == 'true'
+        run: |
+          npm install
+          npx tsx index.ts
+
+      - name: Push changes (if required)
+        if: steps.preflight.outputs.can_run == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          force: true
+
+      - name: Comment Error
+        id: commentError
+        if: steps.preflight.outputs.can_run == 'true' && steps.runBot.outputs.exitcode == 1
+        uses: actions/github-script@v5
+        continue-on-error: true
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Liquidator bot (${{ matrix.network }}) failed for run at "$date"__"$time": Exit Code 1`
+            })
