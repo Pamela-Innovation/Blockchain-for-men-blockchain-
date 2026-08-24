@@ -43,8 +43,10 @@ jobs:
 
       - name: Validate required environment variables
         id: preflight
+        shell: bash
         run: |
           missing=0
+          echo "can_run=false" >> "$GITHUB_OUTPUT"
           for var in JSON_RPC_URL CUSTOM_RELAYER_PRIVATE_KEY CONTRACT_JSON_URL; do
             if [ -z "${!var}" ]; then
               echo "::warning::Missing required environment variable: $var"
@@ -52,8 +54,7 @@ jobs:
             fi
           done
 
-          if [ "$missing" -eq 1 ]; then
-            echo "can_run=false" >> "$GITHUB_OUTPUT"
+          if [ "$missing" -ne 0 ]; then
             echo "Skipping liquidator run because required environment variables are missing."
           else
             echo "can_run=true" >> "$GITHUB_OUTPUT"
