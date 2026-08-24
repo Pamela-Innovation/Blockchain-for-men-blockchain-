@@ -41,13 +41,32 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Check required environment variables
+        id: preflight
+        run: |
+          missing_vars=()
+          for var_name in JSON_RPC_URL CUSTOM_RELAYER_PRIVATE_KEY CONTRACT_JSON_URL; do
+            if [ -z "${!var_name}" ]; then
+              missing_vars+=("$var_name")
+            fi
+          done
+
+          if [ ${#missing_vars[@]} -gt 0 ]; then
+            echo "can_run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping bot run because required environment variables are missing: ${missing_vars[*]}"
+          else
+            echo "can_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.preflight.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.preflight.outputs.can_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
