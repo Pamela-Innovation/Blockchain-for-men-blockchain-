@@ -2,6 +2,7 @@ name: CronJob - Liquidator Bot
 on:
   schedule:
     - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+  workflow_dispatch: # allows manual trigger from the Actions tab
 env:
   SWAP_RECIPIENT: ''
   COVALENT_API_KEY: ${{ secrets.COVALENT_API_KEY }}
@@ -96,8 +97,8 @@ jobs:
         id: preflight
         run: |
           can_run=true
-          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ] || [ -z "$CONTRACT_JSON_URL" ]; then
-            echo "Skipping: required environment variables (JSON_RPC_URL, CUSTOM_RELAYER_PRIVATE_KEY, CONTRACT_JSON_URL) are not set."
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ] || [ -z "$CONTRACT_JSON_URL" ] || [ -z "$COVALENT_API_KEY" ]; then
+            echo "Skipping: required environment variables (JSON_RPC_URL, CUSTOM_RELAYER_PRIVATE_KEY, CONTRACT_JSON_URL, COVALENT_API_KEY) are not set."
             can_run=false
           fi
           echo "can_run=$can_run" >> "$GITHUB_OUTPUT"
