@@ -114,7 +114,13 @@ This error means one or more required secrets are missing from your repository. 
 
 | Secret name | Description |
 |---|---|
-| `SCROLL_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Scroll mainnet (e.g. from Infura or Alchemy) |
+| `ETHEREUM_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Ethereum mainnet (e.g. from Infura or Alchemy) |
+| `BASE_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Base mainnet |
+| `ARBITRUM_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Arbitrum mainnet |
+| `OPTIMISM_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Optimism mainnet |
+| `SCROLL_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Scroll mainnet |
+| `GNOSIS_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Gnosis mainnet |
+| `WORLD_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for World mainnet |
 | `CUSTOM_RELAYER_PRIVATE_KEY` | Private key of the relayer/bot wallet (keep this safe!) |
 
 Steps to add a secret:
