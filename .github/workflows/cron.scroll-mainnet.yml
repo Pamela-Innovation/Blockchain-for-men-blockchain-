@@ -41,6 +41,13 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Verify required secrets
+        run: |
+          if [ -z "$JSON_RPC_URL" ] || [ -z "$CUSTOM_RELAYER_PRIVATE_KEY" ]; then
+            echo "::error::Missing required secrets. Please set SCROLL_MAINNET_JSON_RPC_URL and CUSTOM_RELAYER_PRIVATE_KEY under Settings -> Secrets and variables -> Actions. See README for details."
+            exit 1
+          fi
+
       - name: Run bot
         id: runBot
         run: |

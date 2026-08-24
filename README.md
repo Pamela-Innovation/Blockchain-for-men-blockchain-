@@ -1,4 +1,4 @@
-# PoolTogether v5 Liquidator Bot - GitHub Actions.
+# Pamela's Liquidator Bot - GitHub Actions
 
 ### DISCLAIMER: These bots are meant for intermediates & experts to run and modify to their liking. There is a lot of prerequisite knowledge about blockchains, private keys, swaps, and GitHub infrastructure that should be known before running a bot. If anyone ever asks you for your private key _do not give it to them_. Nobody from Generation Software, Pooltime, or PoolTogether will ever ask you for your private key.
 
@@ -106,7 +106,29 @@ The Liquidator bot's relayer account needs to be stocked with ETH (to pay gas fe
 
 ---
 
-## Corporate key security setup
+## Troubleshooting
+
+### Workflow fails with "Unable to find necessary environment variables"
+
+This error means one or more required secrets are missing from your repository. Before the scheduled workflows can run, you **must** add the following secrets under `Settings -> Secrets and variables -> Actions`:
+
+| Secret name | Description |
+|---|---|
+| `SCROLL_MAINNET_JSON_RPC_URL` | JSON-RPC endpoint for Scroll mainnet (e.g. from Infura or Alchemy) |
+| `CUSTOM_RELAYER_PRIVATE_KEY` | Private key of the relayer/bot wallet (keep this safe!) |
+
+Steps to add a secret:
+1. Go to your repository on GitHub.
+2. Click **Settings** → **Secrets and variables** → **Actions**.
+3. Click **New repository secret**.
+4. Enter the name exactly as shown above and paste the value.
+5. Click **Add secret**.
+
+Once both secrets are set, re-run the failed workflow from the **Actions** tab.
+
+---
+
+
 
 ### Goal
 
