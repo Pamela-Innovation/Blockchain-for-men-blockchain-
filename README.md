@@ -130,7 +130,7 @@ Steps to add a secret:
 4. Enter the name exactly as shown above and paste the value.
 5. Click **Add secret**.
 
-Once both secrets are set, re-run the failed workflow from the **Actions** tab.
+Once all required secrets are set, re-run the failed workflow from the **Actions** tab.
 
 ---
 
