@@ -12,6 +12,9 @@ env:
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/ca2acf967a962355b921fd4893306b961e7bc62a/deployments/ethereum/contracts.json'
   ENV_TOKEN_ALLOW_LIST: ''
   NODE_OPTIONS: "--max_old_space_size=32768"
+concurrency:
+  group: liquidator-push-to-main
+  cancel-in-progress: false
 permissions: write-all
 jobs:
   runCLI:

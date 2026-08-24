@@ -13,6 +13,9 @@ env:
   CLAIM_REWARDS: 'true'
   ENV_TOKEN_ALLOW_LIST: ''
   NODE_OPTIONS: "--max_old_space_size=32768"
+concurrency:
+  group: liquidator-push-to-main
+  cancel-in-progress: false
 permissions: write-all
 jobs:
   runCLI:

@@ -12,6 +12,9 @@ env:
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/196aa20f4a0b3e651d0504ffeb0e1b9a08c7ccb6/deployments/gnosis/contracts.json'
   ENV_TOKEN_ALLOW_LIST: ''
   NODE_OPTIONS: "--max_old_space_size=32768"
+concurrency:
+  group: liquidator-push-to-main
+  cancel-in-progress: false
 permissions: write-all
 jobs:
   runCLI:
