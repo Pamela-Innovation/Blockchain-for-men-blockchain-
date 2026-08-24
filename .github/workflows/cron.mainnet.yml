@@ -41,13 +41,34 @@ jobs:
         id: time
         run: echo "time=$(date +'%H-%M-%S_%Z')" >> "$GITHUB_ENV"
 
+      - name: Validate required environment variables
+        id: preflight
+        shell: bash
+        run: |
+          missing=0
+          echo "can_run=false" >> "$GITHUB_OUTPUT"
+          for var in JSON_RPC_URL CUSTOM_RELAYER_PRIVATE_KEY CONTRACT_JSON_URL; do
+            if [ -z "${!var}" ]; then
+              echo "::warning::Missing required environment variable: $var"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "Skipping liquidator run because required environment variables are missing."
+          else
+            echo "can_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run bot
         id: runBot
+        if: steps.preflight.outputs.can_run == 'true'
         run: |
           npm install
           npx tsx index.ts
 
       - name: Push changes (if required)
+        if: steps.preflight.outputs.can_run == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
