@@ -2,6 +2,7 @@ name: CronJob - Liquidator Bot - Base
 on:
   schedule:
     - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+  workflow_dispatch:
 env:
   CHAIN_ID: 8453
   MIN_PROFIT_THRESHOLD_USD: 0.5
@@ -13,6 +14,9 @@ env:
   CLAIM_REWARDS: 'true'
   ENV_TOKEN_ALLOW_LIST: ''
   NODE_OPTIONS: "--max_old_space_size=32768"
+concurrency:
+  group: liquidator-push-to-main
+  cancel-in-progress: false
 permissions: write-all
 jobs:
   runCLI:
@@ -66,15 +70,12 @@ jobs:
           branch: ${{ github.ref }}
           force: true
 
-      - name: Comment Error
-        id: commentError
-        if: steps.checkEnv.outputs.can_run == 'true' && steps.runBot.outputs.exitcode == 1
-        uses: actions/github-script@v5
+      - name: Notify webhook on failure
+        if: steps.checkEnv.outputs.can_run == 'true' && failure()
         continue-on-error: true
-        with:
-          script: |
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `Liquidator bot failed for run at "$date"__"$time": Exit Code 1`
-            })
+        run: |
+          if [[ -n "${{ secrets.WEBHOOK_URL }}" ]]; then
+            curl -s -X POST "${{ secrets.WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"🚨 Liquidator bot failed on **Base** at $date $time. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi

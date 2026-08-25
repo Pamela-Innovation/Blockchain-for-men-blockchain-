@@ -2,6 +2,7 @@ name: CronJob - Liquidator Bot - Ethereum Mainnet
 on:
   schedule:
     - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
+  workflow_dispatch:
 env:
   CHAIN_ID: 1
   MIN_PROFIT_THRESHOLD_USD: 90
@@ -12,6 +13,9 @@ env:
   CONTRACT_JSON_URL: 'https://raw.githubusercontent.com/GenerationSoftware/pt-v5-mainnet/ca2acf967a962355b921fd4893306b961e7bc62a/deployments/ethereum/contracts.json'
   ENV_TOKEN_ALLOW_LIST: ''
   NODE_OPTIONS: "--max_old_space_size=32768"
+concurrency:
+  group: liquidator-push-to-main
+  cancel-in-progress: false
 permissions: write-all
 jobs:
   runCLI:
@@ -64,3 +68,13 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           force: true
+
+      - name: Notify webhook on failure
+        if: steps.checkEnv.outputs.can_run == 'true' && failure()
+        continue-on-error: true
+        run: |
+          if [[ -n "${{ secrets.WEBHOOK_URL }}" ]]; then
+            curl -s -X POST "${{ secrets.WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"🚨 Liquidator bot failed on **Ethereum Mainnet** at $date $time. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+          fi
