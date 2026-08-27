@@ -4,7 +4,7 @@ on:
     - cron: "50 * * * *" # ie. 4:50pm, 5:50pm ... etc.
   workflow_dispatch: # allows manual trigger from the Actions tab
 env:
-  SWAP_RECIPIENT: ''
+  SWAP_RECIPIENT: '0x71b219931ff6dc2b9e51ac17173bfb03097d45b6'
   COVALENT_API_KEY: ${{ secrets.COVALENT_API_KEY }}
   CUSTOM_RELAYER_PRIVATE_KEY: ${{ secrets.CUSTOM_RELAYER_PRIVATE_KEY }}
   NODE_OPTIONS: "--max_old_space_size=32768"
